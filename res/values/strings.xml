@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AUX Manager</string>
+    <string name="manage_aux_switch">Manage AUX Settings</string>
+    <string name="action_restart">Restart</string>
+    <string name="action_stop">Stop</string>
+    <string name="service_started">AUX Manager Service started</string>
+    <string name="service_name">AUX Manager Service</string>
+    <string name="service_description">Managing speaker audio settings</string>
+</resources>
