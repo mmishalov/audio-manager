@@ -1,0 +1,4 @@
+AUXManager
+==========
+
+Managing AUX behaviur
