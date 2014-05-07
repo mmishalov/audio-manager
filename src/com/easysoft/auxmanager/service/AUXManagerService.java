@@ -10,11 +10,13 @@ import android.media.AudioManager;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import com.easysoft.auxmanager.R;
 import com.easysoft.auxmanager.activity.MainActivity;
 import com.easysoft.auxmanager.listener.CallStateListener;
 import com.easysoft.auxmanager.receiver.HeadsetActionBroadcastReceiver;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
+import com.easysoft.auxmanager.shared.Constants;
 
 /**
  * Service implementation
@@ -29,23 +31,29 @@ public class AUXManagerService extends Service {
     private NotificationActionBroadcastReceiver notificationActionReceiver;
     private CallStateListener callStateListener;
     private static boolean IS_ACTIVE = false;
-    int originalMode;
-    boolean originalSpeakerphoneOn;
-    public AUXManagerService() {
-        super();
+    private int originalMode;
+    private boolean originalSpeakerphoneOn;
+    private TelephonyManager telephonyManager;
+    private  AudioManager audioManager;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
         headsetActionReceiver = new HeadsetActionBroadcastReceiver();
         notificationActionReceiver = new NotificationActionBroadcastReceiver();
-        callStateListener = new CallStateListener(this);
+        telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        callStateListener = new CallStateListener(audioManager,  telephonyManager.getCallState());
+        Log.d(Constants.CONTEXT, "Service created");
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         this.originalMode = audioManager.getMode();
         this.originalSpeakerphoneOn = audioManager.isSpeakerphoneOn();
         registerReceiver(headsetActionReceiver,new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         registerReceiver(notificationActionReceiver, new IntentFilter(NotificationActionBroadcastReceiver.STOP_ACTION));
         registerReceiver(notificationActionReceiver, new IntentFilter(NotificationActionBroadcastReceiver.RESTART_ACTION));
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(callStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         IS_ACTIVE = true;
         PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -63,21 +71,22 @@ public class AUXManagerService extends Service {
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
         startForeground(1, notification);
+        Log.d(Constants.CONTEXT, "Service started");
         return super.onStartCommand(intent, flags, startId);
     }
     @Override
     public void onDestroy() {
         unregisterReceiver(headsetActionReceiver);
         unregisterReceiver(notificationActionReceiver);
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(callStateListener,PhoneStateListener.LISTEN_NONE);
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.setMode(this.originalMode);
         audioManager.setSpeakerphoneOn(originalSpeakerphoneOn);
         IS_ACTIVE = false;
         stopForeground(true);
+        Log.d(Constants.CONTEXT, "Service destroyed");
         super.onDestroy();
     }
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -85,6 +94,5 @@ public class AUXManagerService extends Service {
     }
     public static boolean isServiceActive(){
         return IS_ACTIVE;
-    };
-
+    }
 }

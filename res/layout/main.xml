@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-        >
-    <Space
-            android:layout_width="20dp"
-            android:layout_height="40dp"
-            android:id="@+id/space" android:layout_gravity="center"/>
-    <Switch
-            android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <ToggleButton
+            android:id="@+id/toggleButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/manage_aux_switch"
-            android:id="@+id/manageAUXSettingsSwitch"
-            android:textSize="21dp"
-            android:layout_gravity="left|center_vertical" />
-</LinearLayout>
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:height="200dp"
+            android:width="200dp"
+            android:background="@drawable/bgtoggle"
+            android:button="@null"
+            android:textOff=""
+            android:textOn="" />
+
+</RelativeLayout>
 

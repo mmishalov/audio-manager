@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 import com.easysoft.auxmanager.R;
 import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
@@ -18,14 +19,14 @@ import com.easysoft.auxmanager.shared.Constants;
  * @since Android SDK 4.1, JDK 1.7
  */
 public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
-    Switch manageAUXSettingsSwitch;
+    ToggleButton startServiceToggleButton;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        manageAUXSettingsSwitch = (Switch)findViewById(R.id.manageAUXSettingsSwitch);
-        manageAUXSettingsSwitch.setOnCheckedChangeListener(this);
-        manageAUXSettingsSwitch.setChecked(AUXManagerService.isServiceActive());
+        startServiceToggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+        startServiceToggleButton.setOnCheckedChangeListener(this);
+        startServiceToggleButton.setChecked(AUXManagerService.isServiceActive());
     }
 
     @Override
