@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+               android:label="@string/profile_title"
+               android:name=".activity.CreateNewProfileActivity" >
+        </activity>
         <service
                 android:name=".service.AUXManagerService"
                 android:enabled="true"

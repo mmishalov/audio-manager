@@ -6,4 +6,13 @@
     <string name="service_started">AUX Manager Service started</string>
     <string name="service_name">AUX Manager Service</string>
     <string name="service_description">Managing speaker audio settings</string>
+    <string name="action_new_profile">Create new profile</string>
+    <string name="new_profile_name">Profile Name:</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="speakers_on">Turn on speakers on start</string>
+    <string name="profile_title">Profile: </string>
+    <string name="speakers">Speakers</string>
+    <string name="applications">Applications</string>
+
 </resources>
