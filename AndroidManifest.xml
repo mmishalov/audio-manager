@@ -22,7 +22,7 @@
         </activity>
         <activity
                android:label="@string/profile_title"
-               android:name=".activity.CreateNewProfileActivity" >
+               android:name=".activity.EditProfileActivity" >
         </activity>
         <service
                 android:name=".service.AUXManagerService"

@@ -67,10 +67,10 @@ public class ApplicationAdapter  extends ArrayAdapter<ApplicationModel> {
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    applicationModel.setSelected(buttonView.isSelected());
+                    applicationModel.setSelected(isChecked);
                 }
             });
-            checkBox.setTag(appsList.get(position));
+            checkBox.setChecked(appsList.get(position).isSelected());
         }
         return view;
     }

@@ -26,20 +26,21 @@
                         android:id="@+id/app_name"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
+                        android:gravity="left"
                         android:textStyle="bold" />
 
                 <TextView
                         android:id="@+id/app_paackage"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical" />
+                        android:gravity="left"
+                        android:maxLength="35"/>
 
-        </LinearLayout>
-        <CheckBox android:id="@+id/app_checkbox"
+                </LinearLayout>
+            <CheckBox android:id="@+id/app_checkbox"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_alignParentRight="true"
-                  android:layout_alignBaseline="@+id/app_icon" />
+                  />
     </RelativeLayout>
 </LinearLayout>

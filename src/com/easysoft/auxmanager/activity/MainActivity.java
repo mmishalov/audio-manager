@@ -4,17 +4,23 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ToggleButton;
+import android.view.View;
+import android.widget.*;
 import com.easysoft.auxmanager.R;
 import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Main activity
  * <p/>
@@ -24,8 +30,11 @@ import com.easysoft.auxmanager.shared.Constants;
  * @since Android SDK 4.1, JDK 1.7
  */
 public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
-    ToggleButton startServiceToggleButton;
-
+    private ToggleButton startServiceToggleButton;
+    private Spinner spinner;
+    ArrayAdapter<String> spinnerArrayAdapter;
+    private SharedPreferences sharedPreferences;
+    SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +42,70 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         startServiceToggleButton = (ToggleButton) findViewById(R.id.toggleButton);
         startServiceToggleButton.setOnCheckedChangeListener(this);
         startServiceToggleButton.setChecked(AUXManagerService.isServiceActive());
+        spinner = (Spinner) findViewById(R.id.profiles_spinner);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        spinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, new ArrayList<String>()); //selected item will look like a spinner set from XML
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerArrayAdapter);
+        updateProfilesSpinner();
+        initializeListeners();
     }
+
+    @Override
+    protected void onResume() {
+        startServiceToggleButton.setChecked(AUXManagerService.isServiceActive());
+        super.onResume();
+    }
+
+    private void initializeListeners() {
+        //Shared Preferences
+        sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                Log.d(Constants.CONTEXT, "Keu is " + key);
+                updateProfilesSpinner();
+            }
+        };
+        sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        // Buttons
+        ImageButton button = (ImageButton) findViewById(R.id.edit_profile);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putString("profileName", spinner.getSelectedItem().toString());
+                editProfile(bundle);
+            }
+        });
+        button = (ImageButton) findViewById(R.id.delete_profile);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new AlertDialog.Builder(v.getContext())
+                        .setTitle(R.string.delete_profile_dialog_title)
+                        .setMessage(R.string.delete_profile_dialog_message)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                String profilesJson = sharedPreferences.getString("profiles", "");
+                                if (profilesJson != null && !profilesJson.isEmpty()) {
+                                    Gson gson = new Gson();
+                                    HashMap<String, String> profiles = gson.fromJson(profilesJson, HashMap.class);
+                                    profiles.remove(spinner.getSelectedItem().toString());
+                                    SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+                                    prefsEditor.putString("profiles", gson.toJson(profiles));
+                                    prefsEditor.apply();
+                                }
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
@@ -74,28 +146,41 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Bundle sendBundle = new Bundle();
-                sendBundle.putString("profileName", input.getText().toString());
-                Intent i = new Intent(getApplicationContext(), CreateNewProfileActivity.class);
-                i.putExtras(sendBundle);
-                startActivity(i);
+                Bundle bundle = new Bundle();
+                bundle.putString("profileName", input.getText().toString());
+                editProfile(bundle);
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 dialog.cancel();
             }
         });
         builder.show();
     }
+    private void editProfile(Bundle bundle){
+        Intent i = new Intent(getApplicationContext(), EditProfileActivity.class);
+        i.putExtras(bundle);
+        startActivity(i);
+    }
+    private void updateProfilesSpinner(){
+        String profilesJson = sharedPreferences.getString("profiles", "");
+        if(profilesJson!=null && !profilesJson.isEmpty()) {
+            Gson gson = new Gson();
+            HashMap<String, String> profiles = gson.fromJson(profilesJson, HashMap.class);
+            spinnerArrayAdapter.clear();
+            spinnerArrayAdapter.addAll(profiles.keySet());
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
-        if(!AUXManagerService.isServiceActive()){
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        /**if(!AUXManagerService.isServiceActive()){
             android.os.Process.killProcess(android.os.Process.myPid());
-        }
+        }  */
         super.onDestroy();
     }
 }
