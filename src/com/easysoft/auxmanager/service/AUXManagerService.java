@@ -34,7 +34,7 @@ public class AUXManagerService extends Service {
     private int originalMode;
     private boolean originalSpeakerphoneOn;
     private TelephonyManager telephonyManager;
-    private  AudioManager audioManager;
+    private AudioManager audioManager;
 
     @Override
     public void onCreate() {

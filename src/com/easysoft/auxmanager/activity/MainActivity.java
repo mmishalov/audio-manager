@@ -2,9 +2,7 @@ package com.easysoft.auxmanager.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -14,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import com.easysoft.auxmanager.R;
+import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
 import com.google.gson.Gson;
@@ -32,9 +31,11 @@ import java.util.HashMap;
 public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
     private ToggleButton startServiceToggleButton;
     private Spinner spinner;
-    ArrayAdapter<String> spinnerArrayAdapter;
+    private ArrayAdapter<String> spinnerArrayAdapter;
     private SharedPreferences sharedPreferences;
-    SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    private BroadcastReceiver serviceStopActionReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,14 +50,27 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         spinner.setAdapter(spinnerArrayAdapter);
         updateProfilesSpinner();
         initializeListeners();
+        initializeReceivers();
     }
+
+
 
     @Override
     protected void onResume() {
         startServiceToggleButton.setChecked(AUXManagerService.isServiceActive());
         super.onResume();
     }
+    private void initializeReceivers() {
+        serviceStopActionReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(NotificationActionBroadcastReceiver.STOP_ACTION)){
+                    startServiceToggleButton.setChecked(false);
+                }
 
+            }
+        };
+    }
     private void initializeListeners() {
         //Shared Preferences
         sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -174,13 +188,21 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerReceiver((serviceStopActionReceiver), new IntentFilter(NotificationActionBroadcastReceiver.STOP_ACTION));
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterReceiver(serviceStopActionReceiver);
+        super.onStop();
+    }
 
     @Override
     protected void onDestroy() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
-        /**if(!AUXManagerService.isServiceActive()){
-            android.os.Process.killProcess(android.os.Process.myPid());
-        }  */
         super.onDestroy();
     }
 }
