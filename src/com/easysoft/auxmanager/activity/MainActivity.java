@@ -3,6 +3,7 @@ package com.easysoft.auxmanager.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import com.easysoft.auxmanager.R;
+import com.easysoft.auxmanager.activity.profile.ProfileSharedData;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
@@ -131,12 +133,42 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Intent auxManagerIntent  = new Intent(this, AUXManagerService.class);
         if(isChecked){
+            if(!AUXManagerService.isServiceActive())
+                startProfileActivities();
             startService(auxManagerIntent);
         }else {
             stopService(auxManagerIntent);
         }
         Log.d(Constants.CONTEXT,"Service is "  + (isChecked ? "on" : "off"));
     }
+
+    private void startProfileActivities() {
+        String profilesJson = sharedPreferences.getString("profiles", "");
+        ProfileSharedData sharedData = null;
+        if(profilesJson!=null && !profilesJson.isEmpty()) {
+            Gson gson = new Gson();
+            HashMap<String, String> profiles = gson.fromJson(profilesJson,  HashMap.class);
+            String sharedDataJson = profiles.get(spinner.getSelectedItem().toString());
+            if(sharedDataJson!=null &&  !sharedDataJson.isEmpty())
+                sharedData = gson.fromJson(sharedDataJson,ProfileSharedData.class);
+        }
+        if(sharedData!=null) {
+            for(String packageName: sharedData.getSelectedApplications()) {
+                Intent intent;
+                PackageManager manager = getPackageManager();
+                try {
+                    intent = manager.getLaunchIntentForPackage(packageName);
+                    if (intent == null)
+                        throw new PackageManager.NameNotFoundException();
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(intent);
+                } catch (PackageManager.NameNotFoundException e) {
+
+                }
+            }
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
