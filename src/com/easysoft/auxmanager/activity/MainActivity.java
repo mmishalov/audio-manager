@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -132,19 +133,19 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Intent auxManagerIntent  = new Intent(this, AUXManagerService.class);
-        if(isChecked){
-            if(!AUXManagerService.isServiceActive())
-                startProfileActivities();
+        if(isChecked && !AUXManagerService.isServiceActive()){
+            auxManagerIntent.putExtra("speakersOn", startProfileActivities());
             startService(auxManagerIntent);
-        }else {
+        }else if(!isChecked && AUXManagerService.isServiceActive()){
             stopService(auxManagerIntent);
         }
         Log.d(Constants.CONTEXT,"Service is "  + (isChecked ? "on" : "off"));
     }
 
-    private void startProfileActivities() {
+    private boolean startProfileActivities() {
         String profilesJson = sharedPreferences.getString("profiles", "");
-        ProfileSharedData sharedData = null;
+        ProfileSharedData sharedData=null;
+
         if(profilesJson!=null && !profilesJson.isEmpty()) {
             Gson gson = new Gson();
             HashMap<String, String> profiles = gson.fromJson(profilesJson,  HashMap.class);
@@ -153,20 +154,21 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
                 sharedData = gson.fromJson(sharedDataJson,ProfileSharedData.class);
         }
         if(sharedData!=null) {
+            PackageManager manager = getPackageManager();
+            ArrayList<Intent> intents = new ArrayList<>();
             for(String packageName: sharedData.getSelectedApplications()) {
-                Intent intent;
-                PackageManager manager = getPackageManager();
-                try {
-                    intent = manager.getLaunchIntentForPackage(packageName);
-                    if (intent == null)
-                        throw new PackageManager.NameNotFoundException();
+                Intent intent = manager.getLaunchIntentForPackage(packageName);
+                if (intent != null){
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    startActivity(intent);
-                } catch (PackageManager.NameNotFoundException e) {
-
+                    intents.add(intent);
                 }
+                if(!intents.isEmpty())
+                    startActivities(intents.toArray(new Intent[intents.size()]));
+                return sharedData.isSpeakersOn();
             }
+
         }
+        return false;
     }
 
     @Override
@@ -218,6 +220,10 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
             spinnerArrayAdapter.clear();
             spinnerArrayAdapter.addAll(profiles.keySet());
         }
+        String lastSelection =  sharedPreferences.getString("lastSelectedPosition", "");
+        if(lastSelection!=null && !lastSelection.isEmpty()){
+            spinner.setSelection(spinnerArrayAdapter.getPosition(lastSelection));
+        }
     }
 
     @Override
@@ -234,13 +240,17 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         finish();
     }
 
     @Override
     protected void onDestroy() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        prefsEditor.putString("lastSelectedPosition",spinner.getSelectedItem().toString());
+        prefsEditor.apply();
+        if(!AUXManagerService.isServiceActive())
+            android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
     }
 }

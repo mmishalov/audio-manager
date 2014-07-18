@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.util.Log;
+import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
 /**
  * Manages speaker behavior depended on headset activity
@@ -20,16 +21,17 @@ public class HeadsetActionBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
             int state = intent.getIntExtra("state", -1);
-            switch (state) {
-                case 0:
-                case 1:
-                    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                    audioManager.setMode(AudioManager.STREAM_MUSIC);
-                    audioManager.setSpeakerphoneOn(true);
-                    Log.d(Constants.CONTEXT, "Headset is " + ((state==0)? "unplugged" : "plugged"));
-                    break;
-                default:
-            }
+            if(AUXManagerService.isChangeAudio())
+                switch (state) {
+                    case 0:
+                    case 1:
+                        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                        audioManager.setMode(AudioManager.STREAM_MUSIC);
+                        audioManager.setSpeakerphoneOn(true);
+                        Log.d(Constants.CONTEXT, "Headset is " + ((state==0)? "unplugged" : "plugged"));
+                        break;
+                    default:
+                }
         }
     }
 }

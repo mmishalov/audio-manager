@@ -35,6 +35,8 @@ public class AUXManagerService extends Service {
     private boolean originalSpeakerphoneOn;
     private TelephonyManager telephonyManager;
     private AudioManager audioManager;
+    private static boolean IS_CHANGE_AUDIO = true;
+
 
     @Override
     public void onCreate() {
@@ -49,6 +51,7 @@ public class AUXManagerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        IS_CHANGE_AUDIO = intent.getBooleanExtra("speakersOn",true);
         this.originalMode = audioManager.getMode();
         this.originalSpeakerphoneOn = audioManager.isSpeakerphoneOn();
         registerReceiver(headsetActionReceiver,new IntentFilter(Intent.ACTION_HEADSET_PLUG));
@@ -94,5 +97,8 @@ public class AUXManagerService extends Service {
     }
     public static boolean isServiceActive(){
         return IS_ACTIVE;
+    }
+    public static boolean isChangeAudio(){
+        return IS_CHANGE_AUDIO;
     }
 }
