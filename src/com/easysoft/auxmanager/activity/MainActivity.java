@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Main activity
@@ -156,17 +157,16 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         if(sharedData!=null) {
             PackageManager manager = getPackageManager();
             ArrayList<Intent> intents = new ArrayList<>();
-            for(String packageName: sharedData.getSelectedApplications()) {
+            for (String packageName : sharedData.getSelectedApplications()) {
                 Intent intent = manager.getLaunchIntentForPackage(packageName);
-                if (intent != null){
+                if (intent != null) {
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intents.add(intent);
                 }
-                if(!intents.isEmpty())
-                    startActivities(intents.toArray(new Intent[intents.size()]));
-                return sharedData.isSpeakersOn();
             }
-
+            if (!intents.isEmpty())
+                startActivities(intents.toArray(new Intent[intents.size()]));
+            return sharedData.isSpeakersOn();
         }
         return false;
     }
@@ -245,12 +245,12 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
     @Override
     protected void onDestroy() {
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
         prefsEditor.putString("lastSelectedPosition",spinner.getSelectedItem().toString());
         prefsEditor.apply();
         if(!AUXManagerService.isServiceActive())
             android.os.Process.killProcess(android.os.Process.myPid());
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         super.onDestroy();
     }
 }

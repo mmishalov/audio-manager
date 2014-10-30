@@ -1,6 +1,7 @@
 package com.easysoft.auxmanager.service;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -17,6 +18,9 @@ import com.easysoft.auxmanager.listener.CallStateListener;
 import com.easysoft.auxmanager.receiver.HeadsetActionBroadcastReceiver;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.auxmanager.shared.Constants;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Service implementation
@@ -36,6 +40,7 @@ public class AUXManagerService extends Service {
     private TelephonyManager telephonyManager;
     private AudioManager audioManager;
     private static boolean IS_CHANGE_AUDIO = true;
+
 
 
     @Override
@@ -71,10 +76,10 @@ public class AUXManagerService extends Service {
                 .setContentTitle(getString(R.string.service_name))
                 .setContentInfo(getString(R.string.service_description))
                 .setWhen(System.currentTimeMillis())
-                .setPriority(Notification.PRIORITY_MAX)
-                .build();
+                .setPriority(Notification.PRIORITY_MAX).build();
         startForeground(1, notification);
         Log.d(Constants.CONTEXT, "Service started");
+
         return super.onStartCommand(intent, flags, startId);
     }
     @Override
