@@ -27,6 +27,17 @@
                android:label="@string/profile_title"
                android:name=".activity.EditProfileActivity" >
         </activity>
+        <receiver
+                android:label="AUXManager Widget"
+                android:name=".widget.AUXManagerWidgetProvider" >
+            <intent-filter >
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/appwidget_info" />
+        </receiver>
         <service
                 android:name=".service.AUXManagerService"
                 android:enabled="true"

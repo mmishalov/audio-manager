@@ -18,4 +18,5 @@
     <string name="delete_profile">Delete existing profile</string>
     <string name="delete_profile_dialog_title">Delete profile</string>
     <string name="delete_profile_dialog_message">Are you sure you want to delete this profile?</string>
+    <string name="widget_content_description">AuxManager Widget</string>
 </resources>
