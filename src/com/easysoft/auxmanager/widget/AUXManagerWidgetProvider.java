@@ -41,7 +41,7 @@ public class AUXManagerWidgetProvider  extends AppWidgetProvider {
     }
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(intent.getAction().equals(TOGGLE_AUX_MANAGER)) {
+        if(intent.getAction() != null && intent.getAction().equals(TOGGLE_AUX_MANAGER)) {
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             // Create a fresh intent
             Intent serviceIntent = new Intent(context, AUXManagerService.class);

@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +20,7 @@ import com.easysoft.auxmanager.listener.CallStateListener;
 import com.easysoft.auxmanager.receiver.HeadsetActionBroadcastReceiver;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.auxmanager.shared.Constants;
+import com.easysoft.auxmanager.widget.AUXManagerWidgetProvider;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -78,10 +81,21 @@ public class AUXManagerService extends Service {
                 .setWhen(System.currentTimeMillis())
                 .setPriority(Notification.PRIORITY_MAX).build();
         startForeground(1, notification);
+        updateWidget();
         Log.d(Constants.CONTEXT, "Service started");
 
         return super.onStartCommand(intent, flags, startId);
     }
+
+    private void updateWidget() {
+        Intent widgetIntent = new Intent(this,AUXManagerWidgetProvider.class);
+        widgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID, since it seems the onUpdate() is only fired on that
+        int ids[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), AUXManagerWidgetProvider.class));
+        widgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
+        sendBroadcast(widgetIntent);
+    }
+
     @Override
     public void onDestroy() {
         unregisterReceiver(headsetActionReceiver);
@@ -90,6 +104,7 @@ public class AUXManagerService extends Service {
         audioManager.setMode(this.originalMode);
         audioManager.setSpeakerphoneOn(originalSpeakerphoneOn);
         IS_ACTIVE = false;
+        updateWidget();
         stopForeground(true);
         Log.d(Constants.CONTEXT, "Service destroyed");
         super.onDestroy();
