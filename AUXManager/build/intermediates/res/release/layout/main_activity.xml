@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <ToggleButton
+            android:id="@+id/toggleButton"
+            android:layout_width="1024px"
+            android:layout_height="1024px"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bgtoggle"
+            android:button="@null"
+            android:textOff=""
+            android:textOn="" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:layout_centerHorizontal="true"
+                  android:layout_marginBottom="30dp">
+        <Spinner
+            android:id="@+id/profiles_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+           />
+        <ImageButton
+                android:id="@+id/edit_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@null"
+                android:src="@drawable/ic_action_edit"
+                android:contentDescription="@string/edit_profile"
+                />
+        <ImageButton
+                android:id="@+id/delete_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@null"
+                android:src="@drawable/ic_action_delete"
+                android:contentDescription="@string/delete_profile"
+                />
+
+    </LinearLayout>
+
+</RelativeLayout>
+
+<!-- From: file:/C:/Development/mobile/AUXManager/AUXManager/src/main/res/layout/main_activity.xml -->
