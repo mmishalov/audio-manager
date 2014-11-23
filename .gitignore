@@ -28,5 +28,8 @@ proguard/
 *.iws
 .idea/
 *.lock
-*.lock
 *.bin
+
+.gradle
+AUXManager/build
+.idea
