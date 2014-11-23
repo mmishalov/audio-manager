@@ -27,9 +27,8 @@ proguard/
 *.ipr
 *.iws
 .idea/
-*.lock
 *.bin
 
-.gradle/
-AUXManager/build/
-build/
+.gradle/*
+build/*
+
