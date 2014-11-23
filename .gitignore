@@ -29,6 +29,6 @@ proguard/
 .idea/
 *.bin
 
-.gradle/*
-build/*
-
+.gradle/
+build/
+AUXManager/build/
