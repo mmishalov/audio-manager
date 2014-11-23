@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_new_profile"
-          android:title="@string/action_new_profile"
-          android:icon="@drawable/ic_action_new_w"
-          android:showAsAction="ifRoom" />
-
-</menu><!-- From: file:/C:/Development/mobile/AUXManager/AUXManager/src/main/res/menu/main_activity_actions.xml -->
