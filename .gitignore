@@ -28,7 +28,5 @@ proguard/
 *.iws
 .idea/
 *.bin
-
-.gradle/*
+.gradle/
 build/*
-
