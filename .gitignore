@@ -28,5 +28,12 @@ proguard/
 *.iws
 .idea/
 *.bin
+<<<<<<< HEAD
 .gradle/
 build/*
+=======
+
+.gradle/
+build/
+AUXManager/build/
+>>>>>>> b06acc8d013656caf7d7c274dd14b3a06bdbc26e
