@@ -27,3 +27,12 @@ proguard/
 *.ipr
 *.iws
 .idea/
+*.bin
+<<<<<<< HEAD
+.gradle/
+build/
+=======
+
+>>>>>>> b06acc8d013656caf7d7c274dd14b3a06bdbc26e
+
+.gradle/2.1/taskArtifacts/cache.properties
