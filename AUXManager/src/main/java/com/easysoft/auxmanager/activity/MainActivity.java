@@ -3,9 +3,7 @@ package com.easysoft.auxmanager.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -14,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import com.easysoft.auxmanager.R;
-import com.easysoft.auxmanager.activity.profile.ProfileSharedData;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.auxmanager.service.AUXManagerService;
 import com.easysoft.auxmanager.shared.Constants;
@@ -22,7 +19,6 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Main activity
@@ -56,9 +52,6 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         initializeListeners();
         initializeReceivers();
     }
-
-
-
     @Override
     protected void onResume() {
         startServiceToggleButton.setChecked(AUXManagerService.isServiceActive());
@@ -80,7 +73,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                Log.d(Constants.CONTEXT, "Keu is " + key);
+                Log.d(Constants.LOGGER_CONTEXT, "Keu is " + key);
                 updateProfilesSpinner();
             }
         };
@@ -122,6 +115,16 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
                         .show();
             }
         });
+        AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                storeLastSelectedProfile();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinner.setOnItemSelectedListener(onItemSelectedListener);
     }
 
     @Override
@@ -135,42 +138,14 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Intent auxManagerIntent  = new Intent(this, AUXManagerService.class);
         if(isChecked && !AUXManagerService.isServiceActive()){
-            auxManagerIntent.putExtra("speakersOn", startProfileActivities());
+            //ActiveProfileActivitiesExecutor activeProfileActivitiesExecutor = new ActiveProfileActivitiesExecutor(this.getApplicationContext());
+            //auxManagerIntent.putExtra("speakersOn", activeProfileActivitiesExecutor.execute());
             startService(auxManagerIntent);
         }else if(!isChecked && AUXManagerService.isServiceActive()){
             stopService(auxManagerIntent);
         }
-        Log.d(Constants.CONTEXT,"Service is "  + (isChecked ? "on" : "off"));
+        Log.d(Constants.LOGGER_CONTEXT,"Service is "  + (isChecked ? "on" : "off"));
     }
-
-    private boolean startProfileActivities() {
-        String profilesJson = sharedPreferences.getString("profiles", "");
-        ProfileSharedData sharedData=null;
-
-        if(profilesJson!=null && !profilesJson.isEmpty()) {
-            Gson gson = new Gson();
-            HashMap<String, String> profiles = gson.fromJson(profilesJson,  HashMap.class);
-            String sharedDataJson = profiles.get(spinner.getSelectedItem().toString());
-            if(sharedDataJson!=null &&  !sharedDataJson.isEmpty())
-                sharedData = gson.fromJson(sharedDataJson,ProfileSharedData.class);
-        }
-        if(sharedData!=null) {
-            PackageManager manager = getPackageManager();
-            ArrayList<Intent> intents = new ArrayList<>();
-            for (String packageName : sharedData.getSelectedApplications()) {
-                Intent intent = manager.getLaunchIntentForPackage(packageName);
-                if (intent != null) {
-                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    intents.add(intent);
-                }
-            }
-            if (!intents.isEmpty())
-                startActivities(intents.toArray(new Intent[intents.size()]));
-            return sharedData.isSpeakersOn();
-        }
-        return false;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
@@ -245,13 +220,17 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
     @Override
     protected void onDestroy() {
-        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
-        prefsEditor.putString("lastSelectedPosition",spinner.getSelectedItem().toString());
-        prefsEditor.apply();
+        storeLastSelectedProfile();
         if(!AUXManagerService.isServiceActive())
             android.os.Process.killProcess(android.os.Process.myPid());
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         super.onDestroy();
+    }
+
+    private void storeLastSelectedProfile() {
+        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        prefsEditor.putString("lastSelectedPosition",spinner.getSelectedItem().toString());
+        prefsEditor.apply();
     }
 }
 

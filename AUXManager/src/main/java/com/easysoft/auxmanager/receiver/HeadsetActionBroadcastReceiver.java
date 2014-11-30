@@ -28,7 +28,7 @@ public class HeadsetActionBroadcastReceiver extends BroadcastReceiver {
                         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                         audioManager.setMode(AudioManager.STREAM_MUSIC);
                         audioManager.setSpeakerphoneOn(true);
-                        Log.d(Constants.CONTEXT, "Headset is " + ((state==0)? "unplugged" : "plugged"));
+                        Log.d(Constants.LOGGER_CONTEXT, "Headset is " + ((state==0)? "unplugged" : "plugged"));
                         break;
                     default:
                 }

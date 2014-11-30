@@ -1,1 +1,1 @@
-include ':AUXManager', ':application'
+include ':AUXManager'

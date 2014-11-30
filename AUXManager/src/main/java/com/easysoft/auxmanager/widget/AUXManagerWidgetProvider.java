@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 import com.easysoft.auxmanager.R;
 import com.easysoft.auxmanager.service.AUXManagerService;
+import com.easysoft.auxmanager.shared.ActiveProfileActivitiesExecutor;
 
 /**
  * Widget provider

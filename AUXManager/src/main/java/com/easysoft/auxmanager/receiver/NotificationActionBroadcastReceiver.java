@@ -24,7 +24,7 @@ public class NotificationActionBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Log.d(Constants.CONTEXT, "Notification action received:" + action);
+        Log.d(Constants.LOGGER_CONTEXT, "Notification action received:" + action);
         Intent auxManagerIntent  = new Intent(context, AUXManagerService.class);
         if(STOP_ACTION.equals(action) || RESTART_ACTION.equals(action) ){
             context.stopService(auxManagerIntent);

@@ -34,9 +34,9 @@ public class CallStateListener extends PhoneStateListener {
         switch (callState) {
             case TelephonyManager.CALL_STATE_IDLE:
                 if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                    Log.d(Constants.CONTEXT, "Idle => Off Hook = new outgoing call");
+                    Log.d(Constants.LOGGER_CONTEXT, "Idle => Off Hook = new outgoing call");
                 } else if (state == TelephonyManager.CALL_STATE_RINGING) {
-                    Log.d(Constants.CONTEXT, "Idle => Ringing = new incoming call (" + incomingNumber + ")");
+                    Log.d(Constants.LOGGER_CONTEXT, "Idle => Ringing = new incoming call (" + incomingNumber + ")");
                 }
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
@@ -47,20 +47,20 @@ public class CallStateListener extends PhoneStateListener {
                         public void run() {
                             audioManager.setMode(AudioManager.STREAM_MUSIC);
                             audioManager.setSpeakerphoneOn(true);
-                            Log.d(Constants.CONTEXT, "Off Hook => Idle  = disconnected, speaker on");
+                            Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Idle  = disconnected, speaker on");
                         }
                     },5, TimeUnit.SECONDS);
 
                 } else if (state == TelephonyManager.CALL_STATE_RINGING) {
-                    Log.d(Constants.CONTEXT, "Off Hook => Ringing = another call waiting (" + incomingNumber + ")");
+                    Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Ringing = another call waiting (" + incomingNumber + ")");
                 }
                 break;
             case TelephonyManager.CALL_STATE_RINGING:
                 if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
                     audioManager.setSpeakerphoneOn(false);
-                    Log.d(Constants.CONTEXT, "Ringing => Off Hook = received, speaker off");
+                    Log.d(Constants.LOGGER_CONTEXT, "Ringing => Off Hook = received, speaker off");
                 } else if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    Log.d(Constants.CONTEXT, "Ringing => Idle = missed call");
+                    Log.d(Constants.LOGGER_CONTEXT, "Ringing => Idle = missed call");
                 }
                 break;
             default:

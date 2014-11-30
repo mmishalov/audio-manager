@@ -9,5 +9,5 @@ package com.easysoft.auxmanager.shared;
  * @since Android SDK 4.1, JDK 1.7
  */
 public class Constants {
-    public static String CONTEXT = "AUX Manager";
+    public static String LOGGER_CONTEXT = "AUX Manager";
 }

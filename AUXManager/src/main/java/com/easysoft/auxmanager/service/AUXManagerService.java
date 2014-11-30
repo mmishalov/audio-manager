@@ -1,7 +1,6 @@
 package com.easysoft.auxmanager.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -19,11 +18,9 @@ import com.easysoft.auxmanager.activity.MainActivity;
 import com.easysoft.auxmanager.listener.CallStateListener;
 import com.easysoft.auxmanager.receiver.HeadsetActionBroadcastReceiver;
 import com.easysoft.auxmanager.receiver.NotificationActionBroadcastReceiver;
+import com.easysoft.auxmanager.shared.ActiveProfileActivitiesExecutor;
 import com.easysoft.auxmanager.shared.Constants;
 import com.easysoft.auxmanager.widget.AUXManagerWidgetProvider;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Service implementation
@@ -54,12 +51,14 @@ public class AUXManagerService extends Service {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         callStateListener = new CallStateListener(audioManager,  telephonyManager.getCallState());
-        Log.d(Constants.CONTEXT, "Service created");
+        Log.d(Constants.LOGGER_CONTEXT, "Service created");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        IS_CHANGE_AUDIO = intent.getBooleanExtra("speakersOn",true);
+        //IS_CHANGE_AUDIO = intent.getBooleanExtra("speakersOn",true);
+        ActiveProfileActivitiesExecutor executor = new ActiveProfileActivitiesExecutor(getApplicationContext());
+        IS_CHANGE_AUDIO = executor.execute();
         this.originalMode = audioManager.getMode();
         this.originalSpeakerphoneOn = audioManager.isSpeakerphoneOn();
         registerReceiver(headsetActionReceiver,new IntentFilter(Intent.ACTION_HEADSET_PLUG));
@@ -82,7 +81,7 @@ public class AUXManagerService extends Service {
                 .setPriority(Notification.PRIORITY_MAX).build();
         startForeground(1, notification);
         updateWidget();
-        Log.d(Constants.CONTEXT, "Service started");
+        Log.d(Constants.LOGGER_CONTEXT, "Service started");
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -106,7 +105,7 @@ public class AUXManagerService extends Service {
         IS_ACTIVE = false;
         updateWidget();
         stopForeground(true);
-        Log.d(Constants.CONTEXT, "Service destroyed");
+        Log.d(Constants.LOGGER_CONTEXT, "Service destroyed");
         super.onDestroy();
     }
 

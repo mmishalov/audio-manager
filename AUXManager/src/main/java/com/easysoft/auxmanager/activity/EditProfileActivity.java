@@ -99,7 +99,7 @@ public class EditProfileActivity extends ListActivity {
         ProfileSharedData sharedData = buildSharedData();
         profiles.put(sharedData.getProfileName(),gson.toJson(sharedData));
         String json = gson.toJson(profiles);
-        Log.d(Constants.CONTEXT, "commiting " + json);
+        Log.d(Constants.LOGGER_CONTEXT, "commiting " + json);
         prefsEditor.putString("profiles", json);
         prefsEditor.apply();
         super.onPause();
