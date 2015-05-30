@@ -1,7 +1,7 @@
-AUXManager
+AudioManager
 ==========
 
-Application managing AUX behavior on smartphones running Android.
+Application managing audio behavior on smartphones running Android.
 
 Once headset is plugged to phone all audio playback automatically redirected to headset.
 
