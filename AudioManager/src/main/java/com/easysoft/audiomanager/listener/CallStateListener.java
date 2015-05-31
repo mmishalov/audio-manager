@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import com.easysoft.audiomanager.service.AudioManagerService;
 import com.easysoft.audiomanager.shared.Constants;
 
 import java.util.concurrent.Executors;
@@ -31,41 +32,46 @@ public class CallStateListener extends PhoneStateListener {
 
     @Override
     public void onCallStateChanged(int state, String incomingNumber) {
-        switch (callState) {
-            case TelephonyManager.CALL_STATE_IDLE:
-                if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                    Log.d(Constants.LOGGER_CONTEXT, "Idle => Off Hook = new outgoing call");
-                } else if (state == TelephonyManager.CALL_STATE_RINGING) {
-                    Log.d(Constants.LOGGER_CONTEXT, "Idle => Ringing = new incoming call (" + incomingNumber + ")");
-                }
-                break;
-            case TelephonyManager.CALL_STATE_OFFHOOK:
-                if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-                    scheduler.schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            audioManager.setMode(AudioManager.STREAM_MUSIC);
-                            audioManager.setSpeakerphoneOn(true);
-                            Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Idle  = disconnected, speaker on");
-                        }
-                    },5, TimeUnit.SECONDS);
+        if (AudioManagerService.isChangeAudio()) {
+            switch (callState) {
+                case TelephonyManager.CALL_STATE_IDLE:
+                    if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                        Log.d(Constants.LOGGER_CONTEXT, "Idle => Off Hook = new outgoing call");
+                    } else if (state == TelephonyManager.CALL_STATE_RINGING) {
+                        Log.d(Constants.LOGGER_CONTEXT, "Idle => Ringing = new incoming call (" + incomingNumber + ")");
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_OFFHOOK:
+                    if (state == TelephonyManager.CALL_STATE_IDLE) {
+                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                        scheduler.schedule(new Runnable() {
+                            @Override
+                            public void run() {
+                                audioManager.setMode(AudioManager.STREAM_MUSIC);
+                                audioManager.setSpeakerphoneOn(true);
+                                audioManager.setBluetoothScoOn(false);
+                                audioManager.stopBluetoothSco();
+                                Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Idle  = disconnected, speaker on");
+                            }
+                        }, 5, TimeUnit.SECONDS);
 
-                } else if (state == TelephonyManager.CALL_STATE_RINGING) {
-                    Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Ringing = another call waiting (" + incomingNumber + ")");
-                }
-                break;
-            case TelephonyManager.CALL_STATE_RINGING:
-                if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                    audioManager.setSpeakerphoneOn(false);
-                    Log.d(Constants.LOGGER_CONTEXT, "Ringing => Off Hook = received, speaker off");
-                } else if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    Log.d(Constants.LOGGER_CONTEXT, "Ringing => Idle = missed call");
-                }
-                break;
-            default:
+                    } else if (state == TelephonyManager.CALL_STATE_RINGING) {
+                        Log.d(Constants.LOGGER_CONTEXT, "Off Hook => Ringing = another call waiting (" + incomingNumber + ")");
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_RINGING:
+                    if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                        audioManager.setSpeakerphoneOn(false);
+                        audioManager.setBluetoothScoOn(true);
+                        audioManager.startBluetoothSco();
+                        Log.d(Constants.LOGGER_CONTEXT, "Ringing => Off Hook = received, speaker off");
+                    } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                        Log.d(Constants.LOGGER_CONTEXT, "Ringing => Idle = missed call");
+                    }
+                    break;
+                default:
+            }
+            callState = state;
         }
-        callState = state;
     }
-
 }

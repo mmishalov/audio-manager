@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.util.Log;
 import com.easysoft.audiomanager.R;
 import com.easysoft.audiomanager.activity.MainActivity;
 import com.easysoft.audiomanager.listener.CallStateListener;
+import com.easysoft.audiomanager.receiver.BluetoothActionBroadcastReceiver;
 import com.easysoft.audiomanager.receiver.HeadsetActionBroadcastReceiver;
 import com.easysoft.audiomanager.receiver.NotificationActionBroadcastReceiver;
 import com.easysoft.audiomanager.shared.ActiveProfileActivitiesExecutor;
@@ -33,6 +35,7 @@ import com.easysoft.audiomanager.widget.AudioManagerWidgetProvider;
 public class AudioManagerService extends Service {
     private HeadsetActionBroadcastReceiver headsetActionReceiver;
     private NotificationActionBroadcastReceiver notificationActionReceiver;
+    private BluetoothActionBroadcastReceiver bluetoothActionReceiver;
     private CallStateListener callStateListener;
     private static boolean IS_ACTIVE = false;
     private int originalMode;
@@ -48,6 +51,7 @@ public class AudioManagerService extends Service {
         super.onCreate();
         headsetActionReceiver = new HeadsetActionBroadcastReceiver();
         notificationActionReceiver = new NotificationActionBroadcastReceiver();
+        bluetoothActionReceiver = new BluetoothActionBroadcastReceiver();
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         callStateListener = new CallStateListener(audioManager,  telephonyManager.getCallState());
@@ -56,12 +60,12 @@ public class AudioManagerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //IS_CHANGE_AUDIO = intent.getBooleanExtra("speakersOn",true);
         ActiveProfileActivitiesExecutor executor = new ActiveProfileActivitiesExecutor(getApplicationContext());
         IS_CHANGE_AUDIO = executor.execute();
         this.originalMode = audioManager.getMode();
         this.originalSpeakerphoneOn = audioManager.isSpeakerphoneOn();
         registerReceiver(headsetActionReceiver,new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+        registerReceiver(bluetoothActionReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
         registerReceiver(notificationActionReceiver, new IntentFilter(NotificationActionBroadcastReceiver.STOP_ACTION));
         registerReceiver(notificationActionReceiver, new IntentFilter(NotificationActionBroadcastReceiver.RESTART_ACTION));
         telephonyManager.listen(callStateListener, PhoneStateListener.LISTEN_CALL_STATE);
@@ -98,6 +102,7 @@ public class AudioManagerService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(headsetActionReceiver);
+        unregisterReceiver(bluetoothActionReceiver);
         unregisterReceiver(notificationActionReceiver);
         telephonyManager.listen(callStateListener,PhoneStateListener.LISTEN_NONE);
         audioManager.setMode(this.originalMode);
